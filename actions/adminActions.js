@@ -105,3 +105,50 @@ export async function createOrder({
 
   return { success: true };
 }
+export async function getPendingOrders() {
+  await connectDB();
+
+  const orders = await Order.find({ orderState: "pending" })
+    .sort({ createdAt: -1 })
+    .lean();
+
+  return orders || [];
+}
+export async function getConfirmedOrders() {
+  await connectDB();
+
+  const orders = await Order.find({ orderState: "confirmed" })
+    .sort({ createdAt: -1 })
+    .lean();
+
+  return orders || [];
+}
+export async function getShippedOrders() {
+  await connectDB();
+
+  const orders = await Order.find({ orderState: "shipped" })
+    .sort({ createdAt: -1 })
+    .lean();
+
+  return orders || [];
+}
+// Confirm order (pending -> confirmed)
+export async function confirmOrder(orderId) {
+  await connectDB();
+  await Order.findByIdAndUpdate(orderId, { orderState: "confirmed" });
+  return { success: true };
+}
+
+// Ship order (confirmed -> shipped)
+export async function shipOrder(orderId) {
+  await connectDB();
+  await Order.findByIdAndUpdate(orderId, { orderState: "shipped" });
+  return { success: true };
+}
+
+// Delete order
+export async function deleteOrder(orderId) {
+  await connectDB();
+  await Order.findByIdAndDelete(orderId);
+  return { success: true };
+}
