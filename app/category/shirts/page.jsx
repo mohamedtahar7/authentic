@@ -1,84 +1,48 @@
 "use client";
+import { getAllProducts } from "@/actions/adminActions";
+import ProductCard from "@/components/ProductCard";
+import { useEffect, useState } from "react";
 
-import Image from "next/image";
-import { FaTrashAlt, FaBoxes } from "react-icons/fa";
-import { deleteProduct } from "@/actions/adminActions";
-
-export default function AdminProductCard({ product }) {
-  const handleDelete = async () => {
-    const confirmDelete = confirm(
-      `Delete "${product.name}"? This action is irreversible.`,
-    );
-    if (!confirmDelete) return;
-
-    await deleteProduct(product._id);
-    location.reload();
+const page = () => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const fetchProducts = async () => {
+    const pros = await getAllProducts();
+    setProducts(pros);
   };
-
+  useEffect(() => {
+    fetchProducts();
+    setLoading(false);
+  }, []);
   return (
-    <div className="bg-white rounded-2xl border shadow-sm hover:shadow-md transition overflow-hidden">
-      {/* Image */}
-      <div className="relative h-56 bg-gray-100">
-        {product.images?.[0] ? (
-          <Image
-            src={product.images[0]}
-            alt={product.name}
-            fill
-            className="object-cover"
-          />
-        ) : (
-          <div className="h-full flex items-center justify-center text-gray-400">
-            No image
-          </div>
+    <section className="max-w-7xl mx-auto px-4 py-16">
+      {/* Page Title */}
+      <div className="mb-10 mt-10">
+        <h1 className="text-3xl font-bold text-gray-900">Shirts</h1>
+        <p className="text-gray-600 mt-2">
+          Explore our collection of premium Shirts
+        </p>
+      </div>
+
+      {/* Products Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {products.map(
+          (product) =>
+            product.category === "Shirts" && (
+              <ProductCard key={product.id} product={product} />
+            ),
         )}
-
-        {/* Stock badge */}
-        <div className="absolute top-4 left-4 flex items-center gap-2 bg-black text-white px-3 py-1 rounded-full text-xs">
-          <FaBoxes />
-          {product.quantity}
-        </div>
       </div>
 
-      {/* Content */}
-      <div className="p-5 space-y-4">
-        <div>
-          <p className="text-xs uppercase tracking-widest text-gray-400">
-            {product.category}
-          </p>
-          <h3 className="text-lg font-semibold text-gray-900">
-            {product.name}
-          </h3>
-          <p className="font-medium text-gray-900">{product.price}.00 DZD</p>
-        </div>
-
-        {/* Sizes */}
-        <div>
-          <p className="text-sm font-medium text-gray-700 mb-2">
-            Sizes & quantities
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {product.sizes.map((s) => (
-              <span
-                key={s._id}
-                className="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-700"
-              >
-                {s.size} · {s.quantity}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="pt-3 border-t flex justify-end">
-          <button
-            onClick={handleDelete}
-            className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 transition"
-          >
-            <FaTrashAlt />
-            Delete
-          </button>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {products.length === 0 && (
+          <h1 className="text-center text-2xl font-medium">
+            There's no new Products
+          </h1>
+        )}
       </div>
-    </div>
+    </section>
   );
-}
+};
+
+export default page;
