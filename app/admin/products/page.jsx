@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { getAllProducts } from "@/actions/adminActions";
 import AdminProductsGrid from "@/components/admin/AdminProductGrid";
 export default async function AdminProductsPage() {

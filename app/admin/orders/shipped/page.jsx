@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { getShippedOrders } from "@/actions/adminActions";
 import AdminOrderCard from "@/components/admin/AdminOrderCard";
 
