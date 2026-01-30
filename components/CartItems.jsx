@@ -7,8 +7,6 @@ import { CartContext } from "@/contexts/CartContext";
 export default function CartItems() {
   const { cart, total, removeFromCart, increaseAmount, decreaseAmount } =
     useContext(CartContext);
-  console.log(cart);
-
   return (
     <div className="flex flex-col h-full">
       {/* Items */}

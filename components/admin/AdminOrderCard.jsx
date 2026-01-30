@@ -9,8 +9,14 @@ import {
   FiCheck,
   FiTruck,
 } from "react-icons/fi";
+import { TbTruckReturn } from "react-icons/tb";
 import { useState } from "react";
-import { confirmOrder, shipOrder, deleteOrder } from "@/actions/adminActions";
+import {
+  confirmOrder,
+  shipOrder,
+  deleteOrder,
+  returnOrder,
+} from "@/actions/adminActions";
 
 export default function AdminOrderCard({ order, refreshOrders }) {
   const [loading, setLoading] = useState(false);
@@ -33,6 +39,14 @@ export default function AdminOrderCard({ order, refreshOrders }) {
     setLoading(true);
     if (confirm("Are you sure you want to delete this order?")) {
       await deleteOrder(order._id);
+      refreshOrders?.();
+    }
+    setLoading(false);
+  };
+  const handleReturn = async () => {
+    setLoading(true);
+    if (confirm("Are you sure you want to return this order?")) {
+      await returnOrder(order._id);
       refreshOrders?.();
     }
     setLoading(false);
@@ -126,6 +140,15 @@ export default function AdminOrderCard({ order, refreshOrders }) {
             className="px-4 py-2 bg-blue-600 text-white rounded hover:opacity-90 disabled:opacity-40 flex items-center gap-1"
           >
             <FiTruck /> Ship
+          </button>
+        )}
+        {order.orderState === "shipped" && (
+          <button
+            onClick={handleReturn}
+            disabled={loading}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:opacity-90 disabled:opacity-40 flex items-center gap-1"
+          >
+            <TbTruckReturn /> Return
           </button>
         )}
 

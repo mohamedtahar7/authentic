@@ -142,10 +142,79 @@ export async function confirmOrder(orderId) {
 // Ship order (confirmed -> shipped)
 export async function shipOrder(orderId) {
   await connectDB();
-  await Order.findByIdAndUpdate(orderId, { orderState: "shipped" });
+
+  // 1️⃣ Get the order
+  const order = await Order.findById(orderId).lean();
+  if (!order) throw new Error("Order not found");
+
+  // 2️⃣ Loop through ordered items
+  for (const item of order.clientOrder) {
+    const product = await Product.findById(item.id);
+    if (!product) continue;
+
+    // 3️⃣ Find the size inside product.sizes
+    const sizeIndex = product.sizes.findIndex((s) => s.size === item.size);
+
+    if (sizeIndex === -1) continue;
+
+    // 4️⃣ Decrease size quantity (prevent negatives)
+    product.sizes[sizeIndex].quantity = Math.max(
+      0,
+      product.sizes[sizeIndex].quantity - item.amount,
+    );
+
+    // 5️⃣ Recalculate total product quantity
+    product.quantity = product.sizes.reduce(
+      (acc, s) => acc + Number(s.quantity),
+      0,
+    );
+
+    // 6️⃣ Save product
+    await product.save();
+  }
+
+  // 7️⃣ Mark order as shipped
+  await Order.findByIdAndUpdate(orderId, {
+    orderState: "shipped",
+  });
+
   return { success: true };
 }
+// Return Order
+export async function returnOrder(orderId) {
+  await connectDB();
 
+  // 1️⃣ Get the order
+  const order = await Order.findById(orderId).lean();
+  if (!order) throw new Error("Order not found");
+
+  // 2️⃣ Restore stock
+  for (const item of order.clientOrder) {
+    const product = await Product.findById(item.id);
+    if (!product) continue;
+
+    // Find size
+    const sizeIndex = product.sizes.findIndex((s) => s.size === item.size);
+
+    if (sizeIndex === -1) continue;
+
+    // Increase size quantity
+    product.sizes[sizeIndex].quantity += item.amount;
+
+    // Recalculate total quantity
+    product.quantity = product.sizes.reduce(
+      (acc, s) => acc + Number(s.quantity),
+      0,
+    );
+
+    await product.save();
+  }
+
+  // 3️⃣ Delete the returned order
+  await Order.findByIdAndDelete(orderId);
+
+  return { success: true };
+}
 // Delete order
 export async function deleteOrder(orderId) {
   await connectDB();
