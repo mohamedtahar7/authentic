@@ -39,11 +39,12 @@ export default function CartItems() {
                 <p className="text-xs text-gray-500 mt-1">
                   {item.price.toLocaleString()} DZD
                 </p>
+                <p className="text-xs text-gray-500 mt-1">Size : {item.size}</p>
 
                 {/* Quantity controls */}
                 <div className="flex items-center gap-3 mt-2">
                   <button
-                    onClick={() => decreaseAmount(item.id)}
+                    onClick={() => decreaseAmount(item.id, item.size)}
                     className="w-7 h-7 flex items-center justify-center border rounded-full text-sm hover:bg-gray-100"
                   >
                     −
@@ -52,7 +53,7 @@ export default function CartItems() {
                   <span className="text-sm font-medium">{item.amount}</span>
 
                   <button
-                    onClick={() => increaseAmount(item.id)}
+                    onClick={() => increaseAmount(item.id, item.size)}
                     className="w-7 h-7 flex items-center justify-center border rounded-full text-sm hover:bg-gray-100"
                   >
                     +
@@ -62,7 +63,7 @@ export default function CartItems() {
 
               {/* Remove */}
               <button
-                onClick={() => removeFromCart(item.id)}
+                onClick={() => removeFromCart(item.id, item.size)}
                 className="text-xs text-gray-400 hover:text-black transition"
               >
                 ✕

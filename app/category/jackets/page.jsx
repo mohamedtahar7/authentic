@@ -1,20 +1,28 @@
 "use client";
+
 import { getAllProducts } from "@/actions/adminActions";
 import ProductCard from "@/components/ProductCard";
 import { useEffect, useState } from "react";
 
-const page = () => {
+export default function Page() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const fetchProducts = async () => {
-    const pros = await getAllProducts();
-    setProducts(pros);
-  };
+
   useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const pros = await getAllProducts();
+        setProducts(pros);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchProducts();
-    setLoading(false);
-    console.log(products);
   }, []);
+
+  const jackets = products.filter((product) => product.category === "Jackets");
+
   return (
     <section className="max-w-7xl mx-auto px-4 py-16">
       {/* Page Title */}
@@ -25,25 +33,26 @@ const page = () => {
         </p>
       </div>
 
-      {/* Products Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {products.map(
-          (product) =>
-            product.category === "Jackets" && (
-              <ProductCard key={product._id} product={product} />
-            ),
-        )}
-      </div>
+      {/* Loading state */}
+      {loading && (
+        <p className="text-center text-gray-500">Loading products...</p>
+      )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {products.length === 0 && (
-          <h1 className="text-center text-2xl font-medium">
-            There's no new Products
-          </h1>
-        )}
-      </div>
+      {/* Products Grid */}
+      {!loading && jackets.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {jackets.map((product) => (
+            <ProductCard key={product._id} product={product} />
+          ))}
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!loading && jackets.length === 0 && (
+        <h1 className="text-center text-2xl font-medium">
+          There are no products in this category
+        </h1>
+      )}
     </section>
   );
-};
-
-export default page;
+}
