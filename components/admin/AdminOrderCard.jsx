@@ -21,6 +21,12 @@ import {
 export default function AdminOrderCard({ order, refreshOrders }) {
   const [loading, setLoading] = useState(false);
 
+  // ✅ Calculate order total from clientOrder
+  const orderTotal = order.clientOrder.reduce(
+    (acc, item) => acc + item.price * item.amount,
+    0,
+  );
+
   const handleConfirm = async () => {
     setLoading(true);
     await confirmOrder(order._id);
@@ -43,6 +49,7 @@ export default function AdminOrderCard({ order, refreshOrders }) {
     }
     setLoading(false);
   };
+
   const handleReturn = async () => {
     setLoading(true);
     if (confirm("Are you sure you want to return this order?")) {
@@ -116,8 +123,16 @@ export default function AdminOrderCard({ order, refreshOrders }) {
         ))}
       </div>
 
+      {/* Order total */}
+      <div className="mt-6 flex justify-between items-center border-t pt-4">
+        <p className="text-sm text-gray-500">
+          {order.clientOrder.length} item(s)
+        </p>
+        <p className="text-lg font-semibold">Total: {orderTotal} DZD</p>
+      </div>
+
       {/* Footer */}
-      <p className="text-xs text-gray-400 mt-4">
+      <p className="text-xs text-gray-400 mt-2">
         Placed on {new Date(order.createdAt).toLocaleString()}
       </p>
 
@@ -142,6 +157,7 @@ export default function AdminOrderCard({ order, refreshOrders }) {
             <FiTruck /> Ship
           </button>
         )}
+
         {order.orderState === "shipped" && (
           <button
             onClick={handleReturn}
