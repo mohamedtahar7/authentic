@@ -221,3 +221,14 @@ export async function deleteOrder(orderId) {
   await Order.findByIdAndDelete(orderId);
   return { success: true };
 }
+
+export async function adminLogin(username, password) {
+  const ADMIN_USER = "authentique-shop";
+  const ADMIN_PASS = "authentique-shop";
+
+  if (username === ADMIN_USER && password === ADMIN_PASS) {
+    return { success: true };
+  }
+
+  return { success: false };
+}

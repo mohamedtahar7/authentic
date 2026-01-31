@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import AdminLogin from "@/components/admin/AdminLogin";
 import {
   FaBoxes,
   FaPlus,
@@ -22,8 +23,24 @@ const links = [
 ];
 
 export default function AdminLayout({ children }) {
+  const [authenticated, setAuthenticated] = useState(false);
+  const [checked, setChecked] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  useEffect(() => {
+    const isAuth = localStorage.getItem("admin-auth") === "true";
+    setAuthenticated(isAuth);
+    setChecked(true);
+  }, []);
+
+  if (!checked) return null;
+
+  // 🔒 NOT AUTHENTICATED → ONLY LOGIN FORM
+  if (!authenticated) {
+    return <AdminLogin onSuccess={() => setAuthenticated(true)} />;
+  }
+
+  // ✅ AUTHENTICATED → FULL ADMIN UI
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
@@ -59,17 +76,16 @@ export default function AdminLayout({ children }) {
         </nav>
       </div>
 
-      {/* Overlay for mobile */}
+      {/* Overlay */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/30 z-20 md:hidden"
           onClick={() => setSidebarOpen(false)}
-        ></div>
+        />
       )}
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col md:ml-64">
-        {/* Top bar */}
         <header className="flex items-center justify-between bg-white border-b border-gray-200 px-4 h-16">
           <button
             className="md:hidden text-2xl"
@@ -77,12 +93,20 @@ export default function AdminLayout({ children }) {
           >
             ☰
           </button>
-          <h1 className="text-xl font-semibold text-gray-900">
-            Admin Dashboard
-          </h1>
+
+          <h1 className="text-xl font-semibold">Admin Dashboard</h1>
+
+          <button
+            onClick={() => {
+              localStorage.removeItem("admin-auth");
+              window.location.href = "/admin";
+            }}
+            className="text-sm text-red-600 hover:underline"
+          >
+            Logout
+          </button>
         </header>
 
-        {/* Page content */}
         <main className="flex-1 overflow-auto p-6">{children}</main>
       </div>
     </div>
